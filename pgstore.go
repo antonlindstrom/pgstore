@@ -44,7 +44,6 @@ func NewPGStore(dbUrl string, keyPairs ...[]byte) *PGStore {
 
 	if err != nil {
 		// Ignore and return nil
-		//fmt.Printf("SQL connection error: %s\n", err)
 		return nil
 	}
 
@@ -54,7 +53,6 @@ func NewPGStore(dbUrl string, keyPairs ...[]byte) *PGStore {
 
 	if err != nil {
 		// Ignore and return nil
-		//fmt.Printf("Failed to create table http_sessions. Error: %s\n", err)
 		return nil
 	}
 
