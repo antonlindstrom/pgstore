@@ -180,7 +180,7 @@ func (db *PGStore) save(session *sessions.Session) error {
 	if session.IsNew {
 		err = db.DbMap.Insert(&s)
 	} else {
-		_, err = db.DbMap.Update(&s)
+		_, err = db.DbMap.Exec("update http_sessions set data=$1, modifiedon=$2, expireson=$3 where key=$4", s.Data, s.ModifiedOn, s.ExpiresOn, s.Key)
 	}
 
 	return err
