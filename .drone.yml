@@ -1,6 +1,10 @@
 image: go1.2
 env:
   - GOPATH=/var/cache/drone
+  - PGSTORE_TEST_CONN="postgres://postgres@localhost:5432/testDb?sslmode=verify-none"
+services:
+  - postgres
 script:
+  - createdb -h localhost -U postgres testDb
   - make
   - make test
