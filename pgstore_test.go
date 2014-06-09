@@ -26,6 +26,10 @@ var secret = "EyaC2BPcJtNqU3tjEHy+c+Wmqc1yihYIbUWEl/jk0Ga73kWBclmuSFd9HuJKwJw/Wd
 func TestPGStore(t *testing.T) {
 	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
 
+	if ss == nil {
+		t.Fatal("This test requires a real database")
+	}
+
 	defer ss.Close()
 
 	// ROUND 1 - Check that the cookie is being saved
