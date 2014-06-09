@@ -7,6 +7,7 @@ import (
 	"os"
 	"testing"
 )
+
 type headerOnlyResponseWriter http.Header
 
 func (ho headerOnlyResponseWriter) Header() http.Header {
@@ -67,7 +68,6 @@ func TestPGStore(t *testing.T) {
 
 	req.AddCookie(sessions.NewCookie(session.Name(), encoded, session.Options))
 
-
 	session, err = ss.Get(req, "mysess")
 	if err != nil {
 		t.Fatal("failed to get round 2 session", err.Error())
@@ -77,11 +77,10 @@ func TestPGStore(t *testing.T) {
 		t.Fatal("Retrieved session had wrong value:", session.Values["counter"])
 	}
 
-	session.Values["counter"] = 9  // set new value for round 3
+	session.Values["counter"] = 9 // set new value for round 3
 	if err = ss.Save(req, headerOnlyResponseWriter(m), session); err != nil {
 		t.Fatal("Failed to save session:", err.Error())
 	}
-
 
 	// ROUND 2 - check that the cookie has been updated
 	req, err = http.NewRequest("GET", "http://www.example.com", nil)
@@ -100,6 +99,3 @@ func TestPGStore(t *testing.T) {
 	}
 
 }
-
-
-
