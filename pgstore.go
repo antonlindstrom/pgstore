@@ -103,7 +103,6 @@ func (db *PGStore) Save(r *http.Request, w http.ResponseWriter, session *session
 
 	if session.ID == "" {
 		// Generate a random session ID key suitable for storage in the DB
-		session.ID = string(securecookie.GenerateRandomKey(32))
 		session.ID = strings.TrimRight(
 			base32.StdEncoding.EncodeToString(
 				securecookie.GenerateRandomKey(32)), "=")
