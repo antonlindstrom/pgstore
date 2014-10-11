@@ -8,7 +8,7 @@ A session store backend for [gorilla/sessions](http://www.gorillatoolkit.org/pkg
 
 ## Documentation
 
-Available on [godoc.org](http://www.godoc.org/github.com/boj/redistore).
+Available on [godoc.org](http://www.godoc.org/github.com/antonlindstrom/pgstore).
 
 See http://www.gorillatoolkit.org/pkg/sessions for full documentation on underlying interface.
 
