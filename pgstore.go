@@ -74,7 +74,8 @@ func (db *PGStore) New(r *http.Request, name string) (*sessions.Session, error) 
 	if session == nil {
 		return session, nil
 	}
-	session.Options = &(*db.Options)
+	opts := *db.Options
+	session.Options = &(opts)
 	session.IsNew = true
 
 	var err error
