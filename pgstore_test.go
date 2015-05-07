@@ -99,3 +99,31 @@ func TestPGStore(t *testing.T) {
 	}
 
 }
+
+func TestSessionOptionsAreUniquePerSession(t *testing.T) {
+	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
+
+	if ss == nil {
+		t.Fatal("This test requires a real database")
+	}
+
+	defer ss.Close()
+
+	ss.Options.MaxAge = 900
+
+	req, err := http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("Failed to create request", err)
+	}
+
+	session, err := ss.Get(req, "newsess")
+	if err != nil {
+		t.Fatal("Failed to create session", err)
+	}
+
+	session.Options.MaxAge = -1
+
+	if ss.Options.MaxAge != 900 {
+		t.Fatalf("PGStore.Options.MaxAge: expected %d, got %d", 900, ss.Options.MaxAge)
+	}
+}
