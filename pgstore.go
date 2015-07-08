@@ -3,13 +3,14 @@ package pgstore
 import (
 	"database/sql"
 	"encoding/base32"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/coopernurse/gorp"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	_ "github.com/lib/pq"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type PGStore struct {
@@ -121,6 +122,18 @@ func (db *PGStore) Save(r *http.Request, w http.ResponseWriter, session *session
 
 	http.SetCookie(w, sessions.NewCookie(session.Name(), encoded, session.Options))
 	return nil
+}
+
+// MaxLength restricts the maximum length of new sessions to l.
+// If l is 0 there is no limit to the size of a session, use with caution.
+// The default for a new PGStore is 4096. PostgreSQL allows for max
+// value sizes of up to 1GB (http://www.postgresql.org/docs/current/interactive/datatype-character.html)
+func (s *PGStore) MaxLength(l int) {
+	for _, c := range s.Codecs {
+		if codec, ok := c.(*securecookie.SecureCookie); ok {
+			codec.MaxLength(l)
+		}
+	}
 }
 
 //load fetches a session by ID from the database and decodes its content into session.Values

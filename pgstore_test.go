@@ -1,6 +1,7 @@
 package pgstore
 
 import (
+	"encoding/base64"
 	"net/http"
 	"os"
 	"testing"
@@ -99,6 +100,24 @@ func TestPGStore(t *testing.T) {
 		t.Fatal("Retrieved session had wrong value in round 3:", session.Values["counter"])
 	}
 
+	// ROUND 3 - Increase max length
+	req, err = http.NewRequest("GET", "http://www.example.com", nil)
+	if err != nil {
+		t.Fatal("failed to create round 3 request", err)
+	}
+
+	req.AddCookie(sessions.NewCookie(session.Name(), encoded, session.Options))
+	session, err = ss.New(req, "my session")
+	session.Values["big"] = make([]byte, base64.StdEncoding.DecodedLen(4096*2))
+
+	if err = ss.Save(req, headerOnlyResponseWriter(m), session); err == nil {
+		t.Fatal("expected an error, got nil")
+	}
+
+	ss.MaxLength(4096 * 3) // A bit more than the value size to account for encoding overhead.
+	if err = ss.Save(req, headerOnlyResponseWriter(m), session); err != nil {
+		t.Fatal("Failed to save session:", err.Error())
+	}
 }
 
 func TestSessionOptionsAreUniquePerSession(t *testing.T) {
