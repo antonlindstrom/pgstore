@@ -1,11 +1,12 @@
 package pgstore
 
 import (
-	"github.com/gorilla/securecookie"
-	"github.com/gorilla/sessions"
 	"net/http"
 	"os"
 	"testing"
+
+	"github.com/gorilla/securecookie"
+	"github.com/gorilla/sessions"
 )
 
 type headerOnlyResponseWriter http.Header
