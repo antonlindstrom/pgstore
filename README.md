@@ -17,6 +17,8 @@ See http://www.gorillatoolkit.org/pkg/sessions for full documentation on underly
     // Fetch new store.
     store := NewPGStore("postgres://user:password@127.0.0.1:5432/database?sslmode=verify-full", []byte("secret-key"))
     defer store.Close()
+    // Run a background goroutine to clean up expired sessions from the database.
+    defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
     // Get a session.
     session, err = store.Get(req, "session-key")
