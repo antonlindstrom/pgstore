@@ -90,6 +90,8 @@ func (db *PGStore) New(r *http.Request, name string) (*sessions.Session, error) 
 		}
 	}
 
+	db.MaxAge(db.Options.MaxAge)
+
 	return session, err
 }
 
@@ -132,6 +134,20 @@ func (s *PGStore) MaxLength(l int) {
 	for _, c := range s.Codecs {
 		if codec, ok := c.(*securecookie.SecureCookie); ok {
 			codec.MaxLength(l)
+		}
+	}
+}
+
+// MaxAge sets the maximum age for the store and the underlying cookie
+// implementation. Individual sessions can be deleted by setting Options.MaxAge
+// = -1 for that session.
+func (db *PGStore) MaxAge(age int) {
+	db.Options.MaxAge = age
+
+	// Set the maxAge for each securecookie instance.
+	for _, codec := range db.Codecs {
+		if sc, ok := codec.(*securecookie.SecureCookie); ok {
+			sc.MaxAge(age)
 		}
 	}
 }
