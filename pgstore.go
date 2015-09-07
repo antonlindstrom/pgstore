@@ -13,6 +13,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// PGStore represents the currently configured session store
 type PGStore struct {
 	Codecs  []securecookie.Codec
 	Options *sessions.Options
@@ -22,16 +23,17 @@ type PGStore struct {
 
 // Session type
 type Session struct {
-	Id         int64     `db: "id"`
-	Key        string    `db: "key"`
-	Data       string    `db: "data"`
-	CreatedOn  time.Time `db: "created_on"`
-	ModifiedOn time.Time `db: "modified_on"`
-	ExpiresOn  time.Time `db: "expires_on"`
+	Id         int64     `db:"id"`
+	Key        string    `db:"key"`
+	Data       string    `db:"data"`
+	CreatedOn  time.Time `db:"created_on"`
+	ModifiedOn time.Time `db:"modified_on"`
+	ExpiresOn  time.Time `db:"expires_on"`
 }
 
-func NewPGStore(dbUrl string, keyPairs ...[]byte) *PGStore {
-	db, err := sql.Open("postgres", dbUrl)
+// NewPGStore creates a new PGStore instance
+func NewPGStore(dbURL string, keyPairs ...[]byte) *PGStore {
+	db, err := sql.Open("postgres", dbURL)
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 
 	dbStore := &PGStore{
@@ -60,11 +62,13 @@ func NewPGStore(dbUrl string, keyPairs ...[]byte) *PGStore {
 	return dbStore
 }
 
+// Close closes the database connection
 func (db *PGStore) Close() {
 	db.DbMap.Db.Close()
 }
 
-// Fetches a session for a given name after it has been added to the registry.
+// Get Fetches a session for a given name after it has been added to the
+// registry.
 func (db *PGStore) Get(r *http.Request, name string) (*sessions.Session, error) {
 	return sessions.GetRegistry(r).Get(db, name)
 }
@@ -95,6 +99,7 @@ func (db *PGStore) New(r *http.Request, name string) (*sessions.Session, error) 
 	return session, err
 }
 
+// Save saves the given session into the database and deletes cookies if needed
 func (db *PGStore) Save(r *http.Request, w http.ResponseWriter, session *sessions.Session) error {
 	// Set delete if max-age is < 0
 	if session.Options.MaxAge < 0 {
@@ -130,8 +135,8 @@ func (db *PGStore) Save(r *http.Request, w http.ResponseWriter, session *session
 // If l is 0 there is no limit to the size of a session, use with caution.
 // The default for a new PGStore is 4096. PostgreSQL allows for max
 // value sizes of up to 1GB (http://www.postgresql.org/docs/current/interactive/datatype-character.html)
-func (s *PGStore) MaxLength(l int) {
-	for _, c := range s.Codecs {
+func (db *PGStore) MaxLength(l int) {
+	for _, c := range db.Codecs {
 		if codec, ok := c.(*securecookie.SecureCookie); ok {
 			codec.MaxLength(l)
 		}
@@ -152,7 +157,8 @@ func (db *PGStore) MaxAge(age int) {
 	}
 }
 
-//load fetches a session by ID from the database and decodes its content into session.Values
+// load fetches a session by ID from the database and decodes its content
+// into session.Values
 func (db *PGStore) load(session *sessions.Session) error {
 	var s Session
 	err := db.DbMap.SelectOne(&s, "SELECT * FROM http_sessions WHERE key = $1", session.ID)
