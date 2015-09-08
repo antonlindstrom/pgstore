@@ -26,9 +26,9 @@ type Session struct {
 	Id         int64     `db:"id"`
 	Key        string    `db:"key"`
 	Data       string    `db:"data"`
-	CreatedOn  time.Time `db:"created_on"`
-	ModifiedOn time.Time `db:"modified_on"`
-	ExpiresOn  time.Time `db:"expires_on"`
+	CreatedOn  time.Time `db:"createdon"`
+	ModifiedOn time.Time `db:"modifiedon"`
+	ExpiresOn  time.Time `db:"expireson"`
 }
 
 // NewPGStore creates a new PGStore instance
