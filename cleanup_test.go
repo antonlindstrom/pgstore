@@ -10,7 +10,7 @@ import (
 func TestCleanup(t *testing.T) {
 	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
 	if ss == nil {
-		t.Fatal("This test requires a real database")
+		t.Skip("This test requires a real database")
 	}
 
 	defer ss.Close()
