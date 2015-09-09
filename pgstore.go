@@ -31,9 +31,19 @@ type Session struct {
 	ExpiresOn  time.Time `db:"expires_on"`
 }
 
-// NewPGStore creates a new PGStore instance
+// NewPGStore creates a new PGStore instance and a new database/sql pool
 func NewPGStore(dbURL string, keyPairs ...[]byte) *PGStore {
 	db, err := sql.Open("postgres", dbURL)
+	if err != nil {
+		// Ignore and return nil
+		return nil
+	}
+	return NewPGStoreFromPool(db, keyPairs...)
+}
+
+// NewPGStoreFromPool creates a new PGStore instance from an existing
+// database/sql pool
+func NewPGStoreFromPool(db *sql.DB, keyPairs ...[]byte) *PGStore {
 	dbmap := &gorp.DbMap{Db: db, Dialect: gorp.PostgresDialect{}}
 
 	dbStore := &PGStore{
@@ -45,14 +55,9 @@ func NewPGStore(dbURL string, keyPairs ...[]byte) *PGStore {
 		DbMap: dbmap,
 	}
 
-	if err != nil {
-		// Ignore and return nil
-		return nil
-	}
-
 	// Create table if it doesn't exist
 	dbmap.AddTableWithName(Session{}, "http_sessions").SetKeys(true, "Id")
-	err = dbmap.CreateTablesIfNotExists()
+	err := dbmap.CreateTablesIfNotExists()
 
 	if err != nil {
 		// Ignore and return nil
