@@ -14,31 +14,33 @@ See http://www.gorillatoolkit.org/pkg/sessions for full documentation on underly
 
 ### Example
 
-    // Fetch new store.
-    store := NewPGStore("postgres://user:password@127.0.0.1:5432/database?sslmode=verify-full", []byte("secret-key"))
-    defer store.Close()
-    // Run a background goroutine to clean up expired sessions from the database.
-    defer store.StopCleanup(store.Cleanup(time.Minute * 5))
+```go
+// Fetch new store.
+store := NewPGStore("postgres://user:password@127.0.0.1:5432/database?sslmode=verify-full", []byte("secret-key"))
+defer store.Close()
+// Run a background goroutine to clean up expired sessions from the database.
+defer store.StopCleanup(store.Cleanup(time.Minute * 5))
 
-    // Get a session.
-    session, err = store.Get(req, "session-key")
-    if err != nil {
-        log.Error(err.Error())
-    }
+// Get a session.
+session, err = store.Get(req, "session-key")
+if err != nil {
+    log.Error(err.Error())
+}
 
-    // Add a value.
-    session.Values["foo"] = "bar"
+// Add a value.
+session.Values["foo"] = "bar"
 
-    // Save.
-    if err = sessions.Save(req, rsp); err != nil {
-        t.Fatalf("Error saving session: %v", err)
-    }
+// Save.
+if err = sessions.Save(req, rsp); err != nil {
+    t.Fatalf("Error saving session: %v", err)
+}
 
-    // Delete session.
-    session.Options.MaxAge = -1
-    if err = sessions.Save(req, rsp); err != nil {
-        t.Fatalf("Error saving session: %v", err)
-    }
+// Delete session.
+session.Options.MaxAge = -1
+if err = sessions.Save(req, rsp); err != nil {
+    t.Fatalf("Error saving session: %v", err)
+}
+```
 
 ## Thanks
 
