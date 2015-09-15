@@ -40,7 +40,7 @@ func TestCleanup(t *testing.T) {
 
 	// SELECT expired sessions. We should get a zero-length result slice back.
 	var results []int64
-	_, err = ss.DbMap.Select(&results, "SELECT id FROM http_sessions WHERE expireson < now()")
+	_, err = ss.DbMap.Select(&results, "SELECT id FROM http_sessions WHERE expires_on < now()")
 	if err != nil {
 		t.Fatalf("failed to select expired sessions from DB: %v", err)
 	}

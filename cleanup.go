@@ -53,6 +53,6 @@ func (db *PGStore) cleanup(interval time.Duration, quit <-chan struct{}, done ch
 
 // deleteExpired deletes expired sessions from the database.
 func (db *PGStore) deleteExpired() error {
-	_, err := db.DbMap.Exec("DELETE FROM http_sessions WHERE expireson < now()")
+	_, err := db.DbMap.Exec("DELETE FROM http_sessions WHERE expires_on < now()")
 	return err
 }
