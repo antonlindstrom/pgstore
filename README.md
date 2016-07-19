@@ -16,7 +16,10 @@ See http://www.gorillatoolkit.org/pkg/sessions for full documentation on underly
 
 ```go
 // Fetch new store.
-store := NewPGStore("postgres://user:password@127.0.0.1:5432/database?sslmode=verify-full", []byte("secret-key"))
+store, err := NewPGStore("postgres://user:password@127.0.0.1:5432/database?sslmode=verify-full", []byte("secret-key"))
+if err != nil {
+    log.Error(err.Error())
+}
 defer store.Close()
 // Run a background goroutine to clean up expired sessions from the database.
 defer store.StopCleanup(store.Cleanup(time.Minute * 5))
@@ -41,6 +44,10 @@ if err = sessions.Save(req, rsp); err != nil {
     t.Fatalf("Error saving session: %v", err)
 }
 ```
+
+## Breaking changes
+
+* 2016-07-19 - `NewPGStore` and `NewPGStoreFromPool` now returns `(*PGStore, error)`
 
 ## Thanks
 
