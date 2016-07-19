@@ -8,7 +8,12 @@ import (
 )
 
 func TestCleanup(t *testing.T) {
-	ss := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
+	ss, err := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
+
+	if err != nil {
+		t.Fatal("Failed to get store", err)
+	}
+
 	if ss == nil {
 		t.Skip("This test requires a real database")
 	}
