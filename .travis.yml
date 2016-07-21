@@ -1,10 +1,14 @@
 language: go
 
 go:
-  - 1.2
+  - 1.5
+  - 1.6
   - tip
 
-script: make test
+script:
+  - make get-deps
+  - make metalint
+  - make check
 
 env:
   - PGSTORE_TEST_CONN="postgres://postgres@127.0.0.1/test?sslmode=disable"
@@ -13,6 +17,6 @@ before_script:
   - psql -c 'create database test;' -U postgres
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.4"
 
 sudo: false

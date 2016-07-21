@@ -8,14 +8,14 @@ import (
 )
 
 func TestCleanup(t *testing.T) {
-	ss, err := NewPGStore(os.Getenv("PGSTORE_TEST_CONN"), []byte(secret))
-
-	if err != nil {
-		t.Fatal("Failed to get store", err)
+	dsn := os.Getenv("PGSTORE_TEST_CONN")
+	if dsn == "" {
+		t.Skip("This test requires a real database.")
 	}
 
-	if ss == nil {
-		t.Skip("This test requires a real database")
+	ss, err := NewPGStore(dsn, []byte(secret))
+	if err != nil {
+		t.Fatal("Failed to get store", err)
 	}
 
 	defer ss.Close()
@@ -32,7 +32,7 @@ func TestCleanup(t *testing.T) {
 		t.Fatal("Failed to create session", err)
 	}
 
-	// Expire the session
+	// Expire the session.
 	session.Options.MaxAge = 1
 
 	m := make(http.Header)
@@ -40,8 +40,8 @@ func TestCleanup(t *testing.T) {
 		t.Fatal("failed to save session:", err.Error())
 	}
 
-	// Give the ticker a moment to run
-	time.Sleep(time.Second * 1)
+	// Give the ticker a moment to run.
+	time.Sleep(time.Millisecond * 1500)
 
 	// SELECT expired sessions. We should get a zero-length result slice back.
 	var results []int64
