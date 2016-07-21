@@ -5,9 +5,13 @@ go:
   - 1.6
   - tip
 
-script:
+install:
   - make get-deps
+  - go get github.com/campoy/embedmd
+
+script:
   - make metalint
+  - make docs-check
   - make check
 
 env:
