@@ -10,10 +10,12 @@ import (
 	"github.com/coopernurse/gorp"
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
+
+	// Include the pq postgres driver.
 	_ "github.com/lib/pq"
 )
 
-// PGStore represents the currently configured session store
+// PGStore represents the currently configured session store.
 type PGStore struct {
 	Codecs  []securecookie.Codec
 	Options *sessions.Options
@@ -36,7 +38,7 @@ type Session struct {
 func NewPGStore(dbURL string, keyPairs ...[]byte) (*PGStore, error) {
 	db, err := sql.Open("postgres", dbURL)
 	if err != nil {
-		// Ignore and return nil
+		// Ignore PGStore value and return nil.
 		return nil, err
 	}
 	return NewPGStoreFromPool(db, keyPairs...)
@@ -62,14 +64,14 @@ func NewPGStoreFromPool(db *sql.DB, keyPairs ...[]byte) (*PGStore, error) {
 	err := dbmap.CreateTablesIfNotExists()
 
 	if err != nil {
-		// Ignore and return nil
+		// Ignore PGStore value and return nil.
 		return nil, err
 	}
 
 	return dbStore, nil
 }
 
-// Close closes the database connection
+// Close closes the database connection.
 func (db *PGStore) Close() {
 	db.DbMap.Db.Close()
 }
@@ -80,12 +82,13 @@ func (db *PGStore) Get(r *http.Request, name string) (*sessions.Session, error) 
 	return sessions.GetRegistry(r).Get(db, name)
 }
 
-// New returns a new session for the given name w/o adding it to the registry.
+// New returns a new session for the given name without adding it to the registry.
 func (db *PGStore) New(r *http.Request, name string) (*sessions.Session, error) {
 	session := sessions.NewSession(db, name)
 	if session == nil {
-		return session, nil
+		return nil, nil
 	}
+
 	opts := *db.Options
 	session.Options = &(opts)
 	session.IsNew = true
@@ -121,7 +124,8 @@ func (db *PGStore) Save(r *http.Request, w http.ResponseWriter, session *session
 		// Generate a random session ID key suitable for storage in the DB
 		session.ID = strings.TrimRight(
 			base32.StdEncoding.EncodeToString(
-				securecookie.GenerateRandomKey(32)), "=")
+				securecookie.GenerateRandomKey(32),
+			), "=")
 	}
 
 	if err := db.save(session); err != nil {
@@ -165,39 +169,33 @@ func (db *PGStore) MaxAge(age int) {
 }
 
 // load fetches a session by ID from the database and decodes its content
-// into session.Values
+// into session.Values.
 func (db *PGStore) load(session *sessions.Session) error {
 	var s Session
 	err := db.DbMap.SelectOne(&s, "SELECT * FROM http_sessions WHERE key = $1", session.ID)
-
-	if err := securecookie.DecodeMulti(session.Name(), string(s.Data),
-		&session.Values, db.Codecs...); err != nil {
+	if err != nil {
 		return err
 	}
 
-	return err
+	return securecookie.DecodeMulti(session.Name(), string(s.Data), &session.Values, db.Codecs...)
 }
 
 // save writes encoded session.Values to a database record.
 // writes to http_sessions table by default.
 func (db *PGStore) save(session *sessions.Session) error {
-	encoded, err := securecookie.EncodeMulti(session.Name(), session.Values,
-		db.Codecs...)
-
+	encoded, err := securecookie.EncodeMulti(session.Name(), session.Values, db.Codecs...)
 	if err != nil {
 		return err
 	}
 
-	var createdOn time.Time
-	var expiresOn time.Time
-
 	crOn := session.Values["created_on"]
 	exOn := session.Values["expires_on"]
 
-	if crOn == nil {
+	var expiresOn time.Time
+
+	createdOn, ok := crOn.(time.Time)
+	if !ok {
 		createdOn = time.Now()
-	} else {
-		createdOn = crOn.(time.Time)
 	}
 
 	if exOn == nil {
@@ -218,11 +216,10 @@ func (db *PGStore) save(session *sessions.Session) error {
 	}
 
 	if session.IsNew {
-		err = db.DbMap.Insert(&s)
-	} else {
-		_, err = db.DbMap.Exec("update http_sessions set data=$1, modified_on=$2, expires_on=$3 where key=$4", s.Data, s.ModifiedOn, s.ExpiresOn, s.Key)
+		return db.DbMap.Insert(&s)
 	}
 
+	_, err = db.DbMap.Exec("update http_sessions set data=$1, modified_on=$2, expires_on=$3 where key=$4", s.Data, s.ModifiedOn, s.ExpiresOn, s.Key)
 	return err
 }
 
