@@ -74,8 +74,6 @@ I've stolen, borrowed and gotten inspiration from the other backends available:
 
 Thank you all for sharing your code!
 
-What makes this backend different is that it's for Postgresql and uses the fine
-datamapper [Gorp](https://github.com/coopernurse/gorp).
-Make sure you use a somewhat new codebase of Gorp as it now defaults to text for
-strings when it used to default to varchar 255. Varchar 255 is unfortunately too
-small.
+What makes this backend different is that it's for PostgreSQL.
+
+We've recently refactored this backend to use the standard database/sql driver instead of Gorp. This removes a dependency and makes this package very lightweight and makes database interactions very transparent. Lastly, from the standpoint of unit testing where you want to mock the database layer instead of requiring a real database, you can now easily use a package like [go-SQLMock](https://github.com/DATA-DOG/go-sqlmock) to do just that.
