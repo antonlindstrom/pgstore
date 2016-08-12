@@ -226,13 +226,13 @@ func (db *PGStore) destroy(session *sessions.Session) error {
 }
 
 func (db *PGStore) createSessionsTable() error {
-	stmt := "CREATE TABLE IF NOT EXISTS http_sessions (" +
-		"id BIGSERIAL PRIMARY KEY," +
-		"key BYTEA," +
-		"data BYTEA," +
-		"created_on TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP," +
-		"modified_on TIMESTAMPTZ," +
-		"expires_on TIMESTAMPTZ);"
+	stmt := `CREATE TABLE IF NOT EXISTS http_sessions (
+              id BIGSERIAL PRIMARY KEY,
+              key BYTEA,
+              data BYTEA,
+              created_on TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+              modified_on TIMESTAMPTZ,
+              expires_on TIMESTAMPTZ);`
 
 	_, err := db.DbPool.Exec(stmt)
 	if err != nil {
