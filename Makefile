@@ -1,4 +1,9 @@
-DHOST = $(shell echo $$(docker-machine ip))
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+	DHOST := $(shell echo $$(docker-machine ip))
+else
+	DHOST := 127.0.0.1
+endif
 
 all: get-deps build
 
