@@ -25,7 +25,7 @@ check:
 .PHONY: metalint
 metalint:
 	which gometalinter > /dev/null || (go get github.com/alecthomas/gometalinter && gometalinter --install --update)
-	gometalinter --cyclo-over=20 -e "struct field Id should be ID" --enable="gofmt -s" --enable=misspell --disable=lll --fast ./...
+	gometalinter --cyclo-over=20 -e "struct field Id should be ID" --enable="gofmt -s" --enable=misspell --fast ./...
 
 .PHONY: fmt
 fmt:
