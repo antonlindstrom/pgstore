@@ -15,7 +15,7 @@ script:
   - make check
 
 env:
-  - PGSTORE_TEST_CONN="postgres://postgres@127.0.0.1/test?sslmode=disable"
+  - GO15VENDOREXPERIMENT=1 PGSTORE_TEST_CONN="postgres://postgres@127.0.0.1/test?sslmode=disable"
 
 before_script:
   - psql -c 'create database test;' -U postgres
