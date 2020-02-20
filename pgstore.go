@@ -228,13 +228,22 @@ func (db *PGStore) destroy(session *sessions.Session) error {
 }
 
 func (db *PGStore) createSessionsTable() error {
-	stmt := `CREATE TABLE IF NOT EXISTS http_sessions (
+	stmt := `DO $$
+              BEGIN
+              CREATE TABLE IF NOT EXISTS http_sessions (
               id BIGSERIAL PRIMARY KEY,
               key BYTEA,
               data BYTEA,
               created_on TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
               modified_on TIMESTAMPTZ,
-              expires_on TIMESTAMPTZ);`
+              expires_on TIMESTAMPTZ);
+              EXCEPTION WHEN insufficient_privilege THEN
+                IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables WHERE schemaname = current_schema() AND tablename = 'http_sessions') THEN
+                  RAISE;
+                END IF;
+              WHEN others THEN RAISE;
+              END;
+              $$;`
 
 	_, err := db.DbPool.Exec(stmt)
 	if err != nil {
