@@ -112,6 +112,10 @@ func TestPGStore(t *testing.T) {
 
 	req.AddCookie(sessions.NewCookie(session.Name(), encoded, session.Options))
 	session, err = ss.New(req, "my session")
+	if err != nil {
+		t.Fatal("failed to create session", err)
+	}
+
 	session.Values["big"] = make([]byte, base64.StdEncoding.DecodedLen(4096*2))
 
 	if err = ss.Save(req, headerOnlyResponseWriter(m), session); err == nil {

@@ -1,16 +1,15 @@
 language: go
 
 go:
-  - 1.6
-  - 1.7
   - tip
 
 install:
   - make get-deps
   - go get github.com/campoy/embedmd
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.23.6
 
 script:
-  - make metalint
+  - make lint-check
   - make docs-check
   - make check
 
