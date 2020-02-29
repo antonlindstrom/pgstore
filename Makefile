@@ -16,16 +16,15 @@ get-deps:
 	go get -v ./...
 
 .PHONY: test
-test: get-deps metalint docs-check check
+test: get-deps lint-check docs-check check
 
 .PHONY: check
 check:
 	go test -v -race -cover ./...
 
-.PHONY: metalint
-metalint:
-	which gometalinter > /dev/null || (go get github.com/alecthomas/gometalinter && gometalinter --install --update)
-	gometalinter --cyclo-over=20 -e "struct field Id should be ID" --disable=gas --enable=misspell --fast ./...
+.PHONY: lint-check
+lint-check:
+	golangci-lint run
 
 .PHONY: fmt
 fmt:
