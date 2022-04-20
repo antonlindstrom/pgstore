@@ -3,11 +3,12 @@ package pgstore
 import (
 	"database/sql"
 	"encoding/base32"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
 
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
@@ -96,7 +97,7 @@ func (db *PGStore) New(r *http.Request, name string) (*sessions.Session, error) 
 			err = db.load(session)
 			if err == nil {
 				session.IsNew = false
-			} else if errors.Cause(err) == sql.ErrNoRows {
+			} else if errors.Is(err, sql.ErrNoRows) {
 				err = nil
 			}
 		}
@@ -247,7 +248,7 @@ func (db *PGStore) createSessionsTable() error {
 
 	_, err := db.DbPool.Exec(stmt)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to create http_sessions table in the database")
+		return fmt.Errorf("Unable to create http_sessions table in the database, err: %w", err)
 	}
 
 	return nil
@@ -257,7 +258,7 @@ func (db *PGStore) selectOne(s *PGSession, key string) error {
 	stmt := "SELECT id, key, data, created_on, modified_on, expires_on FROM http_sessions WHERE key = $1"
 	err := db.DbPool.QueryRow(stmt, key).Scan(&s.ID, &s.Key, &s.Data, &s.CreatedOn, &s.ModifiedOn, &s.ExpiresOn)
 	if err != nil {
-		return errors.Wrapf(err, "Unable to find session in the database")
+		return fmt.Errorf("Unable to find session in the database, err: %w", err)
 	}
 
 	return nil
