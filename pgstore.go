@@ -237,6 +237,8 @@ func (db *PGStore) createSessionsTable() error {
               created_on TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
               modified_on TIMESTAMPTZ,
               expires_on TIMESTAMPTZ);
+              CREATE INDEX IF NOT EXISTS http_sessions_expiry_idx ON http_sessions (expires_on);
+              CREATE INDEX IF NOT EXISTS http_sessions_key_idx ON http_sessions (key);
               EXCEPTION WHEN insufficient_privilege THEN
                 IF NOT EXISTS (SELECT FROM pg_catalog.pg_tables WHERE schemaname = current_schema() AND tablename = 'http_sessions') THEN
                   RAISE;
