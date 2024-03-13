@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	"errors"
@@ -19,10 +20,11 @@ import (
 
 // PGStore represents the currently configured session store.
 type PGStore struct {
-	Codecs  []securecookie.Codec
-	Options *sessions.Options
-	Path    string
-	DbPool  *sql.DB
+	Codecs   []securecookie.Codec
+	Options  *sessions.Options
+	Path     string
+	DbPool   *sql.DB
+	maxAgeMu sync.RWMutex
 }
 
 // PGSession type
@@ -157,6 +159,16 @@ func (db *PGStore) MaxLength(l int) {
 // implementation. Individual sessions can be deleted by setting Options.MaxAge
 // = -1 for that session.
 func (db *PGStore) MaxAge(age int) {
+	db.maxAgeMu.RLock()
+	prevMaxAge := db.Options.MaxAge
+	db.maxAgeMu.RUnlock()
+
+	if age == prevMaxAge {
+		return
+	}
+
+	db.maxAgeMu.Lock()
+	defer db.maxAgeMu.Unlock()
 	db.Options.MaxAge = age
 
 	// Set the maxAge for each securecookie instance.
